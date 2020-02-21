@@ -1,23 +1,29 @@
 package bootcamp;
 
 import co.paralleluniverse.fibers.Suspendable;
+import com.google.common.collect.ImmutableList;
+import net.corda.core.contracts.Command;
 import net.corda.core.flows.*;
 import net.corda.core.identity.Party;
 import net.corda.core.transactions.SignedTransaction;
 import net.corda.core.transactions.TransactionBuilder;
 import net.corda.core.utilities.ProgressTracker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static java.util.Collections.singletonList;
 
 @InitiatingFlow
 @StartableByRPC
-public class TokenIssueFlowInitiator extends FlowLogic<SignedTransaction> {
-    private final Party owner;
-    private final int amount;
+public class EcoIssueFlowInitiator extends FlowLogic<SignedTransaction> {
+    private final Party vcc;
+    private final String ecoContent;
 
-    public TokenIssueFlowInitiator(Party owner, int amount) {
-        this.owner = owner;
-        this.amount = amount;
+    private static final Logger logger = LoggerFactory.getLogger(EcoIssueFlowInitiator.class);
+
+    public EcoIssueFlowInitiator(Party vcc, String ecoContent ) {
+        this.vcc = vcc;
+        this.ecoContent = ecoContent;
     }
 
     private final ProgressTracker progressTracker = new ProgressTracker();
@@ -33,36 +39,48 @@ public class TokenIssueFlowInitiator extends FlowLogic<SignedTransaction> {
         // We choose our transaction's notary (the notary prevents double-spends).
         Party notary = getServiceHub().getNetworkMapCache().getNotaryIdentities().get(0);
         // We get a reference to our own identity.
-        Party issuer = getOurIdentity();
+        Party fti = getOurIdentity();
 
         /* ============================================================================
-         *         TODO 1 - Create our TokenState to represent on-ledger tokens!
+         *         TODO 1 - Create our EcoState to represent on-ledger tokens!
          * ===========================================================================*/
         // We create our new TokenState.
-        TokenState tokenState = null;
+        EcoState ecoState = new EcoState( fti, vcc, ecoContent );
+        //EcoIssueContract.Commands.Issue command = new EcoIssueContract.Commands.Issue();
 
-
+        final Command<EcoIssueContract.Commands.Issue> txCommand = new Command<>(
+                new EcoIssueContract.Commands.Issue(),
+                ImmutableList.of(fti.getOwningKey(), vcc.getOwningKey()));
         /* ============================================================================
-         *      TODO 3 - Build our token issuance transaction to update the ledger!
+         *      TODO 3 - Build our Eco issuance transaction to update the ledger!
          * ===========================================================================*/
         // We build our transaction.
-        TransactionBuilder transactionBuilder = null;
+        TransactionBuilder transactionBuilder = new TransactionBuilder();
+        transactionBuilder.setNotary( notary );
+        transactionBuilder.addOutputState( ecoState, EcoIssueContract.ID);
+        //transactionBuilder.addCommand( command, ecoState.getFti().getOwningKey(), ecoState.getFti().getOwningKey() );
+        transactionBuilder.addCommand( txCommand );
+
+
 
         /* ============================================================================
-         *          TODO 2 - Write our TokenContract to control token issuance!
+         *          TODO 2 - Write our EcoContract to control token issuance!
          * ===========================================================================*/
         // We check our transaction is valid based on its contracts.
         transactionBuilder.verify(getServiceHub());
 
-        FlowSession session = initiateFlow(owner);
+        FlowSession session = initiateFlow( vcc );
 
         // We sign the transaction with our private key, making it immutable.
+        logger.info("Before signInitialTransaction()");
         SignedTransaction signedTransaction = getServiceHub().signInitialTransaction(transactionBuilder);
 
         // The counterparty signs the transaction
+        logger.info("Before CollectSignaturesFlow()");
         SignedTransaction fullySignedTransaction = subFlow(new CollectSignaturesFlow(signedTransaction, singletonList(session)));
 
         // We get the transaction notarised and recorded automatically by the platform.
+        logger.info("Before FinalityFlow()");
         return subFlow(new FinalityFlow(fullySignedTransaction, singletonList(session)));
     }
 }

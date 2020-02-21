@@ -2,43 +2,41 @@ package bootcamp;
 
 import net.corda.core.contracts.Contract;
 import net.corda.core.identity.CordaX500Name;
-import net.corda.testing.contracts.DummyState;
-import net.corda.testing.core.DummyCommandData;
 import net.corda.testing.core.TestIdentity;
 import net.corda.testing.node.MockServices;
 import org.junit.Test;
 
-import java.util.Arrays;
-
 import static net.corda.testing.node.NodeTestUtils.transaction;
 
 public class ContractTests {
-    private final TestIdentity alice = new TestIdentity(new CordaX500Name("Alice", "", "GB"));
-    private final TestIdentity bob = new TestIdentity(new CordaX500Name("Bob", "", "GB"));
+
+    private final TestIdentity fti = new TestIdentity(new CordaX500Name("FTI", "", "TH"));
+    private final TestIdentity vcc = new TestIdentity(new CordaX500Name("VCC", "", "SG"));
+
     private MockServices ledgerServices = new MockServices(new TestIdentity(new CordaX500Name("TestId", "", "GB")));
 
-//    private TokenState tokenState = new TokenState(alice.getParty(), bob.getParty(), 1);
-//
-//    @Test
-//    public void tokenContractImplementsContract() {
-//        assert(new TokenContract() instanceof Contract);
-//    }
+    private EcoState tokenState = new EcoState(fti.getParty(), vcc.getParty(), "");
+
+    @Test
+    public void tokenContractImplementsContract() {
+        assert(new EcoIssueContract() instanceof Contract);
+    }
 //
 //    @Test
 //    public void tokenContractRequiresZeroInputsInTheTransaction() {
 //        transaction(ledgerServices, tx -> {
 //            // Has an input, will fail.
-//            tx.input(TokenContract.ID, tokenState);
-//            tx.output(TokenContract.ID, tokenState);
-//            tx.command(Arrays.asList(alice.getPublicKey(), bob.getPublicKey()), new TokenContract.Commands.Issue());
+//            tx.input(EcoContract.ID, tokenState);
+//            tx.output(EcoContract.ID, tokenState);
+//            tx.command(Arrays.asList(fti.getPublicKey(), vcc.getPublicKey()), new EcoContract.Commands.Issue());
 //            tx.fails();
 //            return null;
 //        });
 //
 //        transaction(ledgerServices, tx -> {
 //            // Has no input, will verify.
-//            tx.output(TokenContract.ID, tokenState);
-//            tx.command(Arrays.asList(alice.getPublicKey(), bob.getPublicKey()), new TokenContract.Commands.Issue());
+//            tx.output(EcoContract.ID, tokenState);
+//            tx.command(Arrays.asList(fti.getPublicKey(), vcc.getPublicKey()), new EcoContract.Commands.Issue());
 //            tx.verifies();
 //            return null;
 //        });
