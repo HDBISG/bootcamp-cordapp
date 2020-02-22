@@ -56,6 +56,18 @@ public class FlowTests {
 
         assertEquals(network.getNotaryNodes().get(0).getInfo().getLegalIdentities().get(0), output.getNotary());
     }
+
+    @Test
+    public void cancel() throws Exception {
+        String docNo = "abc123";
+
+        EcoCancelFlow.EcoCancelFlowInitiator flow = new EcoCancelFlow.EcoCancelFlowInitiator( new UniqueIdentifier(docNo) );
+
+        CordaFuture<SignedTransaction> future = nodeA.startFlow(flow);
+        network.runNetwork();
+        //SignedTransaction signedTransaction = future.get();
+
+    }
 /*
     @Test
     public void transactionConstructedByFlowHasOneTokenStateOutputWithTheCorrectAmountAndOwner() throws Exception {

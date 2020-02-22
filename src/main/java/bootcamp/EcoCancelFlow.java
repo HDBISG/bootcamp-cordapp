@@ -35,8 +35,8 @@ public class EcoCancelFlow {
 
         private  final Logger logger = LoggerFactory.getLogger(EcoCancelFlowInitiator.class);
 
-        public EcoCancelFlowInitiator( UniqueIdentifier stateLinearId1) {
-            this.stateLinearId = stateLinearId1;
+        public EcoCancelFlowInitiator( UniqueIdentifier stateLinearId) {
+            this.stateLinearId = stateLinearId;
         }
 
         private final ProgressTracker progressTracker = new ProgressTracker();
@@ -51,8 +51,11 @@ public class EcoCancelFlow {
         public SignedTransaction call() throws FlowException {
 
             // 1. Retrieve the IOU State from the vault using LinearStateQueryCriteria
-            List<UUID> listOfLinearIds = Arrays.asList(stateLinearId.getId());
-            QueryCriteria queryCriteria = new QueryCriteria.LinearStateQueryCriteria(null, listOfLinearIds);
+            // List<UUID> listOfLinearIds = Arrays.asList(stateLinearId.getId());
+            QueryCriteria queryCriteria = new QueryCriteria.LinearStateQueryCriteria(
+                    null, null,
+                    ImmutableList.of(stateLinearId.getExternalId()), Vault.StateStatus.UNCONSUMED,null);
+
             Vault.Page results = getServiceHub().getVaultService().queryBy(EcoState.class, queryCriteria);
 
             // 2. Get a reference to the inputState data that we are going to settle.
@@ -91,6 +94,7 @@ public class EcoCancelFlow {
             // We check our transaction is valid based on its contracts.
             transactionBuilder.verify(getServiceHub());
 
+            logger.info("cancel Before initiateFlow()");
             FlowSession session = initiateFlow( ecoState.getVcc() );
 
             // We sign the transaction with our private key, making it immutable.
