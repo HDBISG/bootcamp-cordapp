@@ -16,14 +16,14 @@ import static java.util.Collections.singletonList;
 @InitiatingFlow
 @StartableByRPC
 public class EcoIssueFlowInitiator extends FlowLogic<SignedTransaction> {
-    private final Party vcc;
-    private final String ecoContent;
+    // private final Party vcc;
+    // private final String ecoContent;
+    EcoState ecoState;
 
     private static final Logger logger = LoggerFactory.getLogger(EcoIssueFlowInitiator.class);
 
-    public EcoIssueFlowInitiator(Party vcc, String ecoContent ) {
-        this.vcc = vcc;
-        this.ecoContent = ecoContent;
+    public EcoIssueFlowInitiator(EcoState ecoState ) {
+        this.ecoState = ecoState;
     }
 
     private final ProgressTracker progressTracker = new ProgressTracker();
@@ -45,12 +45,12 @@ public class EcoIssueFlowInitiator extends FlowLogic<SignedTransaction> {
          *         TODO 1 - Create our EcoState to represent on-ledger tokens!
          * ===========================================================================*/
         // We create our new TokenState.
-        EcoState ecoState = new EcoState( fti, vcc, ecoContent );
+
         //EcoIssueContract.Commands.Issue command = new EcoIssueContract.Commands.Issue();
 
         final Command<EcoIssueContract.Commands.Issue> txCommand = new Command<>(
                 new EcoIssueContract.Commands.Issue(),
-                ImmutableList.of(fti.getOwningKey(), vcc.getOwningKey()));
+                ImmutableList.of(fti.getOwningKey(), ecoState.getVcc().getOwningKey()));
         /* ============================================================================
          *      TODO 3 - Build our Eco issuance transaction to update the ledger!
          * ===========================================================================*/
@@ -61,15 +61,13 @@ public class EcoIssueFlowInitiator extends FlowLogic<SignedTransaction> {
         //transactionBuilder.addCommand( command, ecoState.getFti().getOwningKey(), ecoState.getFti().getOwningKey() );
         transactionBuilder.addCommand( txCommand );
 
-
-
         /* ============================================================================
          *          TODO 2 - Write our EcoContract to control token issuance!
          * ===========================================================================*/
         // We check our transaction is valid based on its contracts.
         transactionBuilder.verify(getServiceHub());
 
-        FlowSession session = initiateFlow( vcc );
+        FlowSession session = initiateFlow( ecoState.getVcc() );
 
         // We sign the transaction with our private key, making it immutable.
         logger.info("Before signInitialTransaction()");

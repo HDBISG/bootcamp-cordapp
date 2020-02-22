@@ -9,7 +9,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class StateTests {
-    private final Party fti = new TestIdentity(new CordaX500Name("FTI", "", "TH")).getParty();
+/*    private final Party fti = new TestIdentity(new CordaX500Name("FTI", "", "TH")).getParty();
     private final Party vcc = new TestIdentity(new CordaX500Name("VCC", "", "SG")).getParty();
 
     @Test
@@ -36,5 +36,5 @@ public class StateTests {
         assertEquals(2, eCOState.getParticipants().size());
         assertTrue(eCOState.getParticipants().contains(fti));
         assertTrue(eCOState.getParticipants().contains(vcc));
-    }
+    }*/
 }

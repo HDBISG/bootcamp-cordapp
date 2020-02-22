@@ -15,7 +15,7 @@ public class ContractTests {
 
     private MockServices ledgerServices = new MockServices(new TestIdentity(new CordaX500Name("TestId", "", "GB")));
 
-    private EcoState tokenState = new EcoState(fti.getParty(), vcc.getParty(), "");
+    //private EcoState tokenState = new EcoState(fti.getParty(), vcc.getParty(), "");
 
     @Test
     public void tokenContractImplementsContract() {

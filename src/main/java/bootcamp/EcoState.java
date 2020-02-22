@@ -20,18 +20,20 @@ public class EcoState implements ContractState {
     private String ecoContent;
     private UniqueIdentifier linearId = null;
 
+/*
     public EcoState(Party fti, Party vcc, String ecoContent ) {
         this.fti = fti;
         this.vcc = vcc;
         this.ecoContent = ecoContent;
         this.linearId = new UniqueIdentifier();
     }
+*/
 
-    public EcoState(Party fti, Party vcc, String ecoContent, UniqueIdentifier linearId) {
+    public EcoState(Party fti, Party vcc, UniqueIdentifier linearId, String ecoContent) {
         this.fti = fti;
         this.vcc = vcc;
-        this.ecoContent = ecoContent;
         this.linearId = linearId;
+        this.ecoContent = ecoContent;
     }
 
     public Party getFti() {
